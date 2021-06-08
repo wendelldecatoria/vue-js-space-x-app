@@ -21,10 +21,15 @@
     <div class="header">
       <h1>Vue Js Infinite Loading Excercise</h1>
     </div>
-
+    <div class="filter">
+      <input 
+        v-model="filter" 
+        placeholder="Filter by Mission name"
+      >
+    </div>
     <div id="infinite-scroll">
       <div 
-        v-for="launch in launches" 
+        v-for="launch in filteredLaunchData" 
         :key="launch.flight_number"
         :style="{ backgroundImage: 'url(' + launch.links.mission_patch + ')' }"
         class="list"
@@ -58,10 +63,18 @@ export default {
     return {
       loading: false,
       end: false,
-      launches: [],
+      launchData: [],
+      filter: '',
       offset: 0,
       limit: 3
     };
+  },
+  computed: {
+    filteredLaunchData() {
+      return this.launchData.filter((item) => {
+        return item.mission_name.toLowerCase().includes(this.filter.toLowerCase());
+      });
+    }
   },
   beforeMount() {
     this.getInitialLaunchData();
@@ -76,7 +89,7 @@ export default {
     getInitialLaunchData() {
       this.loading = true;
       axios.get('https://api.spacexdata.com/v3/launches?id=true&limit=' + this.limit + '&offset=' + this.offset).then((response) => {
-        this.launches = response.data;
+        this.launchData = response.data;
         this.incrementOffset();
         this.loading = false;
       });
@@ -97,7 +110,7 @@ export default {
               }, 500);
             } else {
               response.data.map((item) => {
-                this.launches.push(item);
+                this.launchData.push(item);
               });
               this.incrementOffset();
               this.loading = false;
@@ -118,6 +131,7 @@ export default {
   #infinite-scroll {
     width: 30%;
     height: 80vh;
+    margin-top: 25px;
     margin-left: 35%;
     margin-right: 35%;
     background-color: #EAEAEA;
@@ -171,4 +185,22 @@ export default {
     padding: 10px;
     color: #000;
   }
+
+  .filter {
+    text-align:center;
+    font-family: "Helvetica";
+  }
+
+  input {
+    border-radius: 3px;
+    border: 0px;
+    width: 300px;
+    height: 40px;
+    font-size: 12px;
+    padding: 2px;
+  }
+
+  input:focus {
+       outline: none !important;
+    }
 </style>
